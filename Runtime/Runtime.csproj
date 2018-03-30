@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -53,8 +54,12 @@
   <ItemGroup>
     <Compile Include="Models\Camera.cs" />
     <Compile Include="Models\Device.cs" />
+    <Compile Include="Models\Matrix.cs" />
     <Compile Include="Models\Mesh.cs" />
+    <Compile Include="Models\Quaternion.cs" />
+    <Compile Include="Models\Vector2.cs" />
     <Compile Include="Models\Vector3.cs" />
+    <Compile Include="Models\Vector4.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

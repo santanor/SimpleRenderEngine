@@ -5,5 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
-    <Grid />
+    <Grid>
+        <Label>Hello there</Label>
+        <Image Name="Img" Height="480" Width="640" Source="20180220_170505_HoloLens.jpg" />
+    </Grid>
 </Window>
