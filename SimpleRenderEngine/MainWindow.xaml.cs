@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -54,7 +55,8 @@ namespace SimpleRenderEngine
         /// <param name="e"></param>
         private void Render( object sender, object e )
         {
-            //device.Clear(0, 255, 134, 255);
+            //Restarts the background with black
+            device.Clear(0, 0, 0, 255);
 
             for (var index = 0; index < meshes.Count; index++)
             {
@@ -63,11 +65,11 @@ namespace SimpleRenderEngine
                 mesh.Rotation = new Vector3(mesh.Rotation.X + 0.01f, mesh.Rotation.Y + 0.01f, mesh.Rotation.Z);
 
                 // Doing the various matrix operations
-                //device.Render(camera, mesh);
+                device.Render(camera, mesh);
             }
 
             // Flushing the back buffer into the front buffer
-            //device.Present();
+            device.Present();
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -40,11 +41,11 @@ namespace Runtime.Models
         /// </summary>
         public void Present()
         {
-            var source = BitmapSource.Create((int)bmp.Width, (int)bmp.Height, 96, 96, PixelFormats.Bgra32, null,
-                                backBuffer,( int)bmp.Width * 4);
-            bmp = new WriteableBitmap(source);
+            bmp.Lock();
+            Marshal.Copy(backBuffer, 0, bmp.BackBuffer, backBuffer.Length);
             // Specify the area of the bitmap that changed.
-            //bmp.AddDirtyRect(new Int32Rect(0, 0, (int) bmp.Width, (int) bmp.Height));
+            bmp.AddDirtyRect(new Int32Rect(0, 0, (int) bmp.Width, (int) bmp.Height));
+            bmp.Unlock();
         }
 
         /// <summary>

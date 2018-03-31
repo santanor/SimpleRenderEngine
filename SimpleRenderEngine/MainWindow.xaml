@@ -4,9 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="1080" Width="1920" WindowState="Maximized" WindowStyle="None">
     <Grid>
-        <Label>Hello there</Label>
-        <Image Name="Img" Height="480" Width="640" Source="20180220_170505_HoloLens.jpg" />
+        <Image Name="Img" Height="1080" Width="1920" Stretch="UniformToFill" />
     </Grid>
 </Window>
