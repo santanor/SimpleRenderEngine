@@ -1,9 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Windows.Controls;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Runtime.Models;
+using Runtime;
+using Runtime.Math;
 
 namespace SimpleRenderEngine
 {
@@ -15,6 +17,8 @@ namespace SimpleRenderEngine
         private Camera camera;
         private Device device;
         private IList<Mesh> meshes;
+        private Stopwatch frameWatch;
+        private int frameCount;
 
         public MainWindow()
         {
@@ -22,13 +26,16 @@ namespace SimpleRenderEngine
             StartupRuntimeEngine();
         }
 
+        /// <summary>
+        /// Creates the elements to run the engine, the camera, meshes and stuff like that
+        /// </summary>
         private void StartupRuntimeEngine()
         {
             camera = new Camera();
             meshes = new List<Mesh> {CreateCube()};
 
-            camera.Position = new Vector3(0, 0, 10.0f);
-            camera.Target = Vector3.Zero;
+            camera.Position = new Vector3(0, 0, 15.0f);
+            camera.Target = meshes[0].Position;
 
             // Choose the back buffer resolution here
             var bmp = new WriteableBitmap(
@@ -44,6 +51,8 @@ namespace SimpleRenderEngine
             // Our XAML Image control
             Img.Source = bmp;
 
+            frameWatch = new Stopwatch();
+
             // Registering to the XAML rendering loop
             CompositionTarget.Rendering += Render;
         }
@@ -55,6 +64,7 @@ namespace SimpleRenderEngine
         /// <param name="e"></param>
         private void Render( object sender, object e )
         {
+            CalculateFps();
             //Restarts the background with black
             device.Clear(0, 0, 0, 255);
 
@@ -73,25 +83,72 @@ namespace SimpleRenderEngine
         }
 
         /// <summary>
+        /// Every second displays how many frames have passed. This is a basic FPS counter
+        /// </summary>
+        private void CalculateFps()
+        {
+            //Start the stopwatch the first time
+            if (!frameWatch.IsRunning)
+            {
+                frameWatch.Start();
+            }
+            if (frameWatch.ElapsedMilliseconds > 1000)
+            {
+                FrameCounter.Content = string.Empty;
+                FrameCounter.Content = frameCount.ToString();
+                frameWatch.Reset();
+                frameCount = 0;
+            }
+
+            frameCount++;
+        }
+
+        protected override void OnKeyDown( KeyEventArgs e )
+        {
+            //Closes the app
+            if (e.Key == Key.Escape)
+            {
+                Close();
+            }
+        }
+
+        /// <summary>
         /// Returns a basic unitary cube
         /// </summary>
         /// <returns></returns>
         private Mesh CreateCube()
         {
-            var mesh = new Mesh("Cube", 8)
+            var mesh = new Mesh
             {
-                Vertices =
+                Name = "Cube",
+                Vertices = new[]
                 {
-                    [0] = new Vector3(-1, 1, 1),
-                    [1] = new Vector3(1, 1, 1),
-                    [2] = new Vector3(-1, -1, 1),
-                    [3] = new Vector3(-1, -1, -1),
-                    [4] = new Vector3(-1, 1, -1),
-                    [5] = new Vector3(1, 1, -1),
-                    [6] = new Vector3(1, -1, 1),
-                    [7] = new Vector3(1, -1, -1)
+                    new Vector3(-1, 1, 1),
+                    new Vector3(1, 1, 1),
+                    new Vector3(-1, -1, 1),
+                    new Vector3(1, -1, 1),
+                    new Vector3(-1, 1, -1),
+                    new Vector3(1, 1, -1),
+                    new Vector3(1, -1, -1),
+                    new Vector3(-1, -1, -1)
+                },
+                Faces = new[]
+                {
+                    new Face {A = 0, B = 1, C = 2},
+                    new Face {A = 1, B = 2, C = 3},
+                    new Face {A = 1, B = 3, C = 6},
+                    new Face {A = 1, B = 5, C = 6},
+                    new Face {A = 0, B = 1, C = 4},
+                    new Face {A = 1, B = 4, C = 5},
+                    new Face {A = 2, B = 3, C = 7},
+                    new Face {A = 3, B = 6, C = 7},
+                    new Face {A = 0, B = 2, C = 7},
+                    new Face {A = 0, B = 4, C = 7},
+                    new Face {A = 4, B = 5, C = 6},
+                    new Face {A = 4, B = 6, C = 7}
                 }
             };
+
             return mesh;
         }
     }

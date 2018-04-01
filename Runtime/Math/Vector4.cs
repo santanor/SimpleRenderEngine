@@ -1,4 +1,4 @@
-﻿namespace Runtime.Models
+﻿namespace Runtime.Math
 {
     public struct Vector4
     {

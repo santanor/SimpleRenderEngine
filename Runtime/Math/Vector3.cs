@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Runtime.Models
+﻿namespace Runtime.Math
 {
     public struct Vector3
     {
@@ -75,7 +73,7 @@ namespace Runtime.Models
         public void Normalize()
         {
             var length = Length();
-            if (Math.Abs(length) > zeroTolerance)
+            if (System.Math.Abs(length) > zeroTolerance)
             {
                 var inv = 1.0f / length;
                 X *= inv;
@@ -141,7 +139,7 @@ namespace Runtime.Models
         /// </remarks>
         public float Length()
         {
-            return (float) Math.Sqrt(X * X + Y * Y + Z * Z);
+            return (float) System.Math.Sqrt(X * X + Y * Y + Z * Z);
         }
     }
 }

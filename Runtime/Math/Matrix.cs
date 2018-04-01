@@ -1,7 +1,6 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
-namespace Runtime.Models
+namespace Runtime.Math
 {
     /// <summary>
     /// Represents a 4x4 mathematical matrix.
@@ -201,7 +200,7 @@ namespace Runtime.Models
         // ReSharper disable once InconsistentNaming
         private static void PerspectiveFovRH( float fov, float aspect, float znear, float zfar, out Matrix result )
         {
-            var yScale = (float) ( 1.0f / Math.Tan(fov * 0.5f) );
+            var yScale = (float) ( 1.0f / System.Math.Tan(fov * 0.5f) );
             var q = zfar / ( znear - zfar );
 
             result = new Matrix

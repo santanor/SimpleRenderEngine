@@ -52,14 +52,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\Camera.cs" />
-    <Compile Include="Models\Device.cs" />
-    <Compile Include="Models\Matrix.cs" />
-    <Compile Include="Models\Mesh.cs" />
-    <Compile Include="Models\Quaternion.cs" />
-    <Compile Include="Models\Vector2.cs" />
-    <Compile Include="Models\Vector3.cs" />
-    <Compile Include="Models\Vector4.cs" />
+    <Compile Include="Camera.cs" />
+    <Compile Include="Device.cs" />
+    <Compile Include="Math\Face.cs" />
+    <Compile Include="Math\Matrix.cs" />
+    <Compile Include="Math\Mesh.cs" />
+    <Compile Include="Math\Quaternion.cs" />
+    <Compile Include="Math\Vector2.cs" />
+    <Compile Include="Math\Vector3.cs" />
+    <Compile Include="Math\Vector4.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

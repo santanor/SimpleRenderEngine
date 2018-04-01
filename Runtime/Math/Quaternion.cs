@@ -1,7 +1,6 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
-namespace Runtime.Models
+namespace Runtime.Math
 {
     /// <summary>
     /// Represents a four dimensional mathematical quaternion.
@@ -65,12 +64,12 @@ namespace Runtime.Models
             var halfPitch = pitch * 0.5f;
             var halfYaw = yaw * 0.5f;
 
-            var sinRoll = (float) Math.Sin(halfRoll);
-            var cosRoll = (float) Math.Cos(halfRoll);
-            var sinPitch = (float) Math.Sin(halfPitch);
-            var cosPitch = (float) Math.Cos(halfPitch);
-            var sinYaw = (float) Math.Sin(halfYaw);
-            var cosYaw = (float) Math.Cos(halfYaw);
+            var sinRoll = (float) System.Math.Sin(halfRoll);
+            var cosRoll = (float) System.Math.Cos(halfRoll);
+            var sinPitch = (float) System.Math.Sin(halfPitch);
+            var cosPitch = (float) System.Math.Cos(halfPitch);
+            var sinYaw = (float) System.Math.Sin(halfYaw);
+            var cosYaw = (float) System.Math.Cos(halfYaw);
 
             result.X = cosYaw * sinPitch * cosRoll + sinYaw * cosPitch * sinRoll;
             result.Y = sinYaw * cosPitch * cosRoll - cosYaw * sinPitch * sinRoll;

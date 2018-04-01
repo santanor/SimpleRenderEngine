@@ -1,4 +1,6 @@
-﻿namespace Runtime.Models
+﻿using Runtime.Math;
+
+namespace Runtime
 {
     public class Camera
     {

@@ -1,10 +1,11 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Runtime.Math;
+using Matrix = Runtime.Math.Matrix;
 
-namespace Runtime.Models
+namespace Runtime
 {
     /// <summary>
     /// It's kind of the core?
@@ -12,7 +13,7 @@ namespace Runtime.Models
     public class Device
     {
         private readonly byte[] backBuffer;
-        private WriteableBitmap bmp;
+        private readonly WriteableBitmap bmp;
 
         public Device( WriteableBitmap bmp )
         {
@@ -71,7 +72,7 @@ namespace Runtime.Models
         /// <param name="coord"></param>
         /// <param name="transMat"></param>
         /// <returns></returns>
-        public Vector2 Project( Vector3 coord, Matrix transMat )
+        private Vector2 Project( Vector3 coord, Matrix transMat )
         {
             // transforming the coordinates
             var point = Vector3.ToScreenCoordinates(coord, transMat);
@@ -100,6 +101,27 @@ namespace Runtime.Models
                 });
         }
 
+        private void DrawLine( Vector2 p0, Vector2 p1 )
+        {
+            while (true)
+            {
+                var dist = ( p1 - p0 ).Length();
+
+                // If the distance between the 2 points is less than 2 pixels
+                // We're exiting
+                if (dist < 2) return;
+
+                // Find the middle point between first & second point
+                var middlePoint = p0 + ( p1 - p0 ) / 2;
+                // We draw this point on screen
+                DrawPoint(middlePoint);
+                // Recursive algorithm launched between first & middle point
+                // and between middle & second point
+                DrawLine(p0, middlePoint);
+                p0 = middlePoint;
+            }
+        }
+
         /// <summary>
         /// The main method of the engine that re-compute each vertex projection
         /// during each frame
@@ -123,12 +145,23 @@ namespace Runtime.Models
 
                 var transformMatrix = worldMatrix * viewMatrix * projectionMatrix;
 
-                foreach (var vertex in mesh.Vertices)
+                for (var i = 0; i < mesh.Vertices.Length -1; i++)
                 {
-                    // First, we project the 3D coordinates into the 2D space
-                    var point = Project(vertex, transformMatrix);
-                    // Then we can draw on screen
-                    DrawPoint(point);
+                    //Iterate over the faces, get the vertices of each face and draw the lines between them
+                    for (var j = 0; j < mesh.Faces.Length; j++)
+                    {
+                        var vertA = mesh.Vertices[mesh.Faces[j].A];
+                        var vertB = mesh.Vertices[mesh.Faces[j].B];
+                        var vertC = mesh.Vertices[mesh.Faces[j].C];
+
+                        var pixelA = Project(vertA, transformMatrix);
+                        var pixelB = Project(vertB, transformMatrix);
+                        var pixelC = Project(vertC, transformMatrix);
+
+                        DrawLine(pixelA, pixelB);
+                        DrawLine(pixelB, pixelC);
+                        DrawLine(pixelC, pixelA);
+                    }
                 }
             }
         }
