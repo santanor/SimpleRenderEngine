@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Runtime;
 using Runtime.Math;
+using Runtime.ParserModels;
 
 namespace SimpleRenderEngine
 {
@@ -16,9 +16,9 @@ namespace SimpleRenderEngine
     {
         private Camera camera;
         private Device device;
-        private IList<Mesh> meshes;
-        private Stopwatch frameWatch;
         private int frameCount;
+        private Stopwatch frameWatch;
+        private IList<Mesh> meshes;
 
         public MainWindow()
         {
@@ -32,9 +32,11 @@ namespace SimpleRenderEngine
         private void StartupRuntimeEngine()
         {
             camera = new Camera();
-            meshes = new List<Mesh> {CreateCube()};
 
-            camera.Position = new Vector3(0, 0, 15.0f);
+            var parser = new Parser("Shuttle.obj");
+            meshes = parser.Parse();
+
+            camera.Position = new Vector3(0, 0, 5000.0f);
             camera.Target = meshes[0].Position;
 
             // Choose the back buffer resolution here
@@ -72,7 +74,7 @@ namespace SimpleRenderEngine
             {
                 var mesh = meshes[index];
                 // rotating slightly the cube during each frame rendered
-                mesh.Rotation = new Vector3(mesh.Rotation.X + 0.01f, mesh.Rotation.Y + 0.01f, mesh.Rotation.Z);
+                mesh.Rotation = new Vector3(mesh.Rotation.X +0.02f, mesh.Rotation.Y + 0.02f, mesh.Rotation.Z);
 
                 // Doing the various matrix operations
                 device.Render(camera, mesh);
@@ -88,10 +90,7 @@ namespace SimpleRenderEngine
         private void CalculateFps()
         {
             //Start the stopwatch the first time
-            if (!frameWatch.IsRunning)
-            {
-                frameWatch.Start();
-            }
+            if (!frameWatch.IsRunning) frameWatch.Start();
             if (frameWatch.ElapsedMilliseconds > 1000)
             {
                 FrameCounter.Content = string.Empty;
@@ -106,10 +105,7 @@ namespace SimpleRenderEngine
         protected override void OnKeyDown( KeyEventArgs e )
         {
             //Closes the app
-            if (e.Key == Key.Escape)
-            {
-                Close();
-            }
+            if (e.Key == Key.Escape) Close();
         }
 
         /// <summary>

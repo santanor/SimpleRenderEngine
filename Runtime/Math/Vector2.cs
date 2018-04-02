@@ -21,7 +21,7 @@
         /// </remarks>
         public float Length()
         {
-            return (float)System.Math.Sqrt((X * X) + (Y * Y));
+            return (float) System.Math.Sqrt(X * X + Y * Y);
         }
 
         /// <summary>
@@ -30,7 +30,7 @@
         /// <param name="left">The first vector to subtract.</param>
         /// <param name="right">The second vector to subtract.</param>
         /// <returns>The difference of the two vectors.</returns>
-        public static Vector2 operator -(Vector2 left, Vector2 right)
+        public static Vector2 operator -( Vector2 left, Vector2 right )
         {
             return new Vector2(left.X - right.X, left.Y - right.Y);
         }
@@ -40,7 +40,7 @@
         /// </summary>
         /// <param name="value">The vector to negate.</param>
         /// <returns>A vector facing in the opposite direction.</returns>
-        public static Vector2 operator -(Vector2 value)
+        public static Vector2 operator -( Vector2 value )
         {
             return new Vector2(-value.X, -value.Y);
         }
@@ -51,7 +51,7 @@
         /// <param name="left">The first vector to add.</param>
         /// <param name="right">The second vector to add.</param>
         /// <returns>The sum of the two vectors.</returns>
-        public static Vector2 operator +(Vector2 left, Vector2 right)
+        public static Vector2 operator +( Vector2 left, Vector2 right )
         {
             return new Vector2(left.X + right.X, left.Y + right.Y);
         }
@@ -62,7 +62,7 @@
         /// <param name="value">The vector to scale.</param>
         /// <param name="scale">The amount by which to scale the vector.</param>
         /// <returns>The scaled vector.</returns>
-        public static Vector2 operator /(Vector2 value, Vector2 scale)
+        public static Vector2 operator /( Vector2 value, Vector2 scale )
         {
             return new Vector2(value.X / scale.X, value.Y / scale.Y);
         }
@@ -73,7 +73,7 @@
         /// <param name="value">The vector to scale.</param>
         /// <param name="scale">The amount by which to scale the vector.</param>
         /// <returns>The scaled vector.</returns>
-        public static Vector2 operator /(Vector2 value, float scale)
+        public static Vector2 operator /( Vector2 value, float scale )
         {
             return new Vector2(value.X / scale, value.Y / scale);
         }
