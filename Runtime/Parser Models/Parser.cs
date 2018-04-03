@@ -56,7 +56,7 @@ namespace Runtime.ParserModels
             //This filesystem starts each line with a letter representing a vertex (v), normal (vn)  or a face (f)
             string[] lines = File.ReadAllLines(fileName);
 
-            var vertices = new List<Vector3>();
+            var vertices = new List<Vertex>();
             var normals = new List<Vector3>();
             var faces = new List<Face>();
             var name = "";
@@ -70,11 +70,14 @@ namespace Runtime.ParserModels
                 switch (lineChunks[0])
                 {
                     case "v"://It's a vertex
-                        vertices.Add( new Vector3
+                        vertices.Add( new Vertex()
                         {
-                            X = float.Parse(lineChunks[1]),
-                            Y = float.Parse(lineChunks[2]),
-                            Z = float.Parse(lineChunks[3])
+                            Coordinates =
+                            {
+                                X = float.Parse(lineChunks[1]),
+                                Y = float.Parse(lineChunks[2]),
+                                Z = float.Parse(lineChunks[3])
+                            }
                         });
                         break;
                     case "vn"://It's a normal
@@ -98,6 +101,24 @@ namespace Runtime.ParserModels
                         name = lineChunks[1];
                     break;
                 }
+            }
+
+            //Loop through the vertices and add the normal
+            for (var i = 0; i < vertices.Count; i++)
+            {
+                //Make sure there's a normal
+                var normal = normals?[i];
+                if (!normal.HasValue) break;
+
+                //Save the variable, struct stuff....
+                var vert =  vertices[i];
+                vert.Normal = new Vector3()
+                {
+                    X = normal.Value.X,
+                    Y = normal.Value.Y,
+                    Z = normal.Value.Z
+                };
+                vertices[i] = vert;
             }
 
             var mesh = new Mesh
