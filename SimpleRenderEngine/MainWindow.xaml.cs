@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -35,6 +36,10 @@ namespace SimpleRenderEngine
 
             var parser = new Parser("Shuttle.obj");
             meshes = parser.Parse();
+
+            var texture = new Texture("tex.jpg", 1024, 1024);
+            // ReSharper disable once PossibleNullReferenceException
+            meshes.FirstOrDefault().Texture = texture;
 
             camera.Position = new Vector3(0, 0, 5000.0f);
             camera.Target = meshes[0].Position;

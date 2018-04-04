@@ -108,7 +108,8 @@ namespace Runtime
             {
                 Coordinates = new Vector3(x, y, point3D.Z),
                 Normal = normal3DWorld,
-                WorldCoordinates = point3D
+                WorldCoordinates = point3D,
+                TexCoord = vertex.TexCoord
             };
         }
 
@@ -145,7 +146,7 @@ namespace Runtime
         /// papb -> pcpd
         /// pa, vb, vc, vd must then be sorted before
         /// </summary>
-        private void ProcessScanLine( ScanLineData data, Vertex va, Vertex vb, Vertex vc, Vertex vd, Color color )
+        private void ProcessScanLine( ScanLineData data, Vertex va, Vertex vb, Vertex vc, Vertex vd, Color color, Texture texture )
         {
             var pa = va.Coordinates;
             var pb = vb.Coordinates;
@@ -168,16 +169,28 @@ namespace Runtime
             var snl = Interpolate(data.Ndotla, data.Ndotlb, gradient1);
             var enl = Interpolate(data.Ndotlc, data.Ndotld, gradient2);
 
+            // Interpolating texture coordinates on Y
+            var su = Interpolate(data.Ua, data.Ub, gradient1);
+            var eu = Interpolate(data.Uc, data.Ud, gradient2);
+            var sv = Interpolate(data.Va, data.Vb, gradient1);
+            var ev = Interpolate(data.Vc, data.Vd, gradient2);
+
             // drawing a line from left (sx) to right (ex)
             for (var x = sx; x < ex; x++)
             {
+                //var gradient = (x - sx) / (float)(ex - sx);
                 var gradient = (x - sx) / (float)(ex - sx);
 
                 var z = Interpolate(z1, z2, gradient);
                 var ndotl = Interpolate(snl, enl, gradient);
+                var u = Interpolate(su, eu, gradient);
+                var v = Interpolate(sv, ev, gradient);
+
+                var textureColor = texture?.Map(u, v) ?? Colors.Black;
+
                 // changing the color value using the cosine of the angle
                 // between the light vector and the normal vector
-                DrawPoint(new Vector3(x, data.CurrentY, z), color * ndotl);
+                DrawPoint(new Vector3(x, data.CurrentY, z), textureColor);
             }
         }
 
@@ -199,7 +212,8 @@ namespace Runtime
             return System.Math.Max(0, Vector3.Dot(normal, lightDirection));
         }
 
-        private void DrawTriangle( Vertex v1, Vertex v2, Vertex v3, Color color )
+
+        private void DrawTriangle( Vertex v1, Vertex v2, Vertex v3, Color color, Texture texture )
         {
             // Sorting the points in order to always have this order on screen p1, p2 & p3
             // with p1 always up (thus having the Y the lowest possible to be near the top screen)
@@ -277,7 +291,18 @@ namespace Runtime
                         data.Ndotlb = nl3;
                         data.Ndotlc = nl1;
                         data.Ndotld = nl2;
-                        ProcessScanLine(data, v1, v3, v1, v2, color);
+
+                        data.Ua = v1.TexCoord.X;
+                        data.Ub = v3.TexCoord.X;
+                        data.Uc = v1.TexCoord.X;
+                        data.Ud = v2.TexCoord.X;
+
+                        data.Va = v1.TexCoord.Y;
+                        data.Vb = v3.TexCoord.Y;
+                        data.Vc = v1.TexCoord.Y;
+                        data.Vd = v2.TexCoord.Y;
+
+                        ProcessScanLine(data, v1, v3, v1, v2, color, texture);
                     }
                     else
                     {
@@ -285,7 +310,18 @@ namespace Runtime
                         data.Ndotlb = nl3;
                         data.Ndotlc = nl2;
                         data.Ndotld = nl3;
-                        ProcessScanLine(data, v1, v3, v2, v3, color);
+
+                        data.Ua = v1.TexCoord.X;
+                        data.Ub = v3.TexCoord.X;
+                        data.Uc = v2.TexCoord.X;
+                        data.Ud = v3.TexCoord.X;
+
+                        data.Va = v1.TexCoord.Y;
+                        data.Vb = v3.TexCoord.Y;
+                        data.Vc = v2.TexCoord.Y;
+                        data.Vd = v3.TexCoord.Y;
+
+                        ProcessScanLine(data, v1, v3, v2, v3, color, texture);
                     }
                 }
             }
@@ -312,7 +348,18 @@ namespace Runtime
                         data.Ndotlb = nl2;
                         data.Ndotlc = nl1;
                         data.Ndotld = nl3;
-                        ProcessScanLine(data, v1, v2, v1, v3, color);
+
+                        data.Ua = v1.TexCoord.X;
+                        data.Ub = v2.TexCoord.X;
+                        data.Uc = v1.TexCoord.X;
+                        data.Ud = v3.TexCoord.X;
+
+                        data.Va = v1.TexCoord.Y;
+                        data.Vb = v2.TexCoord.Y;
+                        data.Vc = v1.TexCoord.Y;
+                        data.Vd = v3.TexCoord.Y;
+
+                        ProcessScanLine(data, v1, v2, v1, v3, color, texture);
                     }
                     else
                     {
@@ -320,7 +367,18 @@ namespace Runtime
                         data.Ndotlb = nl3;
                         data.Ndotlc = nl1;
                         data.Ndotld = nl3;
-                        ProcessScanLine(data, v2, v3, v1, v3, color);
+
+                        data.Ua = v2.TexCoord.X;
+                        data.Ub = v3.TexCoord.X;
+                        data.Uc = v1.TexCoord.X;
+                        data.Ud = v3.TexCoord.X;
+
+                        data.Va = v2.TexCoord.Y;
+                        data.Vb = v3.TexCoord.Y;
+                        data.Vc = v1.TexCoord.Y;
+                        data.Vd = v3.TexCoord.Y;
+
+                        ProcessScanLine(data, v2, v3, v1, v3, color, texture);
                     }
                 }
             }
@@ -364,7 +422,7 @@ namespace Runtime
                         ScG = color,
                         ScR = color,
                         ScA = 1f
-                    });
+                    }, mesh.Texture);
                 });
             }
         }
