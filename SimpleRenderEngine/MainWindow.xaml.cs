@@ -37,7 +37,7 @@ namespace SimpleRenderEngine
             var parser = new Parser("Shuttle.obj");
             meshes = parser.Parse();
 
-            var texture = new Texture("tex.jpg", 1024, 1024);
+            var texture = new Texture("tex.jpg", 2048, 1024);
             // ReSharper disable once PossibleNullReferenceException
             meshes.FirstOrDefault().Texture = texture;
 

@@ -10,8 +10,9 @@ namespace Runtime
     public class Texture
     {
         private byte[] internalBuffer;
-        private int width;
-        private int height;
+        private readonly int width;
+        private readonly int height;
+        private WriteableBitmap bmp;
 
         public Texture( string fileName, int width, int height )
         {
@@ -28,21 +29,19 @@ namespace Runtime
         {
             try
             {
-                internalBuffer = File.ReadAllBytes(fileName);
+                var buffer= File.ReadAllBytes(fileName);
 
-                var bmp = new WriteableBitmap(
+                bmp = new WriteableBitmap(
                     width,
                     height,
-                    96,
-                    96,
+                    300,
+                    300,
                     PixelFormats.Bgra32,
                     null);
+                Marshal.Copy(buffer, 0, bmp.BackBuffer, buffer.Length);
+                internalBuffer = new byte[width * bmp.BackBufferStride];
+                bmp.CopyPixels(internalBuffer, bmp.BackBufferStride, 0);
 
-                bmp.Lock();
-                Marshal.Copy(internalBuffer , 0, bmp.BackBuffer, internalBuffer .Length);
-                // Specify the area of the bitmap that changed.
-                bmp.AddDirtyRect(new Int32Rect(0, 0, (int) bmp.Width, (int) bmp.Height));
-                bmp.Unlock();
             }
             catch (Exception e)
             {
@@ -59,13 +58,13 @@ namespace Runtime
         public Color Map(float tu, float tv)
         {
             if (internalBuffer == null)
-                return Colors.White;
+                return Colors.Aqua;
 
             // using a % operator to cycle/repeat the texture if needed
             var u = System.Math.Abs((int) (tu*width) % width);
             var v = System.Math.Abs((int) (tv*height) % height);
 
-            var pos = ( u + v * width );
+            var pos = ( u + v * width ) * (PixelFormats.Bgra32.BitsPerPixel/8);
             var b = internalBuffer[pos];
             var g = internalBuffer[pos + 1];
             var r = internalBuffer[pos + 2];
