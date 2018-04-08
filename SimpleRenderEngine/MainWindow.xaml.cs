@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -15,11 +13,12 @@ namespace SimpleRenderEngine
     /// </summary>
     public partial class MainWindow
     {
-        private Camera camera;
-        private Device device;
-        private int frameCount;
-        private Stopwatch frameWatch;
-        private IList<Mesh> meshes;
+        readonly float cameraMovementSpeed = 100f;
+        Camera camera;
+        Device device;
+        int frameCount;
+        Stopwatch frameWatch;
+        Mesh[] meshes;
 
         public MainWindow()
         {
@@ -30,16 +29,12 @@ namespace SimpleRenderEngine
         /// <summary>
         /// Creates the elements to run the engine, the camera, meshes and stuff like that
         /// </summary>
-        private void StartupRuntimeEngine()
+        void StartupRuntimeEngine()
         {
             camera = new Camera();
 
-            var parser = new Parser("Shuttle.obj");
+            var parser = new Parser("Shuttle\\space-shuttle-orbiter.obj");
             meshes = parser.Parse();
-
-            var texture = new Texture("tex.jpg", 2048, 1024);
-            // ReSharper disable once PossibleNullReferenceException
-            meshes.FirstOrDefault().Texture = texture;
 
             camera.Position = new Vector3(0, 0, 5000.0f);
             camera.Target = meshes[0].Position;
@@ -69,22 +64,13 @@ namespace SimpleRenderEngine
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Render( object sender, object e )
+        void Render( object sender, object e )
         {
             CalculateFps();
             //Restarts the background with black
             device.Clear(0, 0, 0, 255);
 
-            for (var index = 0; index < meshes.Count; index++)
-            {
-                var mesh = meshes[index];
-                // rotating slightly the cube during each frame rendered
-                mesh.Rotation = new Vector3(mesh.Rotation.X +0.02f, mesh.Rotation.Y + 0.02f, mesh.Rotation.Z);
-
-                // Doing the various matrix operations
-                device.Render(camera, mesh);
-            }
-
+            device.Render(camera, meshes);
             // Flushing the back buffer into the front buffer
             device.Present();
         }
@@ -92,7 +78,7 @@ namespace SimpleRenderEngine
         /// <summary>
         /// Every second displays how many frames have passed. This is a basic FPS counter
         /// </summary>
-        private void CalculateFps()
+        void CalculateFps()
         {
             //Start the stopwatch the first time
             if (!frameWatch.IsRunning) frameWatch.Start();
@@ -111,6 +97,28 @@ namespace SimpleRenderEngine
         {
             //Closes the app
             if (e.Key == Key.Escape) Close();
+            //Manages the camera movement. Dirty, but it works
+            if (e.Key == Key.W)
+                camera.Position = new Vector3(camera.Position.X, camera.Position.Y,
+                                              camera.Position.Z - cameraMovementSpeed);
+
+            if (e.Key == Key.S)
+                camera.Position = new Vector3(camera.Position.X, camera.Position.Y,
+                                              camera.Position.Z + cameraMovementSpeed);
+            if (e.Key == Key.A)
+                camera.Position = new Vector3(camera.Position.X - cameraMovementSpeed, camera.Position.Y,
+                                              camera.Position.Z);
+
+            if (e.Key == Key.D)
+                camera.Position = new Vector3(camera.Position.X + cameraMovementSpeed, camera.Position.Y,
+                                              camera.Position.Z);
+            if (e.Key == Key.Q)
+                camera.Position = new Vector3(camera.Position.X, camera.Position.Y + cameraMovementSpeed,
+                                              camera.Position.Z);
+
+            if (e.Key == Key.E)
+                camera.Position = new Vector3(camera.Position.X, camera.Position.Y - cameraMovementSpeed,
+                                              camera.Position.Z);
         }
     }
 }

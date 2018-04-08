@@ -13,11 +13,11 @@ namespace Runtime
     /// </summary>
     public class Device
     {
-        private readonly byte[] backBuffer;
-        private readonly float[] depthBuffer;
-        private readonly WriteableBitmap bmp;
-        private readonly int renderWidth;
-        private readonly int renderHeight;
+        readonly byte[] backBuffer;
+        readonly WriteableBitmap bmp;
+        readonly float[] depthBuffer;
+        readonly int renderHeight;
+        readonly int renderWidth;
 
         public Device( WriteableBitmap bmp )
         {
@@ -44,10 +44,7 @@ namespace Runtime
             }
 
             // Clearing Depth Buffer
-            for (var index = 0; index < depthBuffer.Length; index++)
-            {
-                depthBuffer[index] = float.MaxValue;
-            }
+            for (var index = 0; index < depthBuffer.Length; index++) depthBuffer[index] = float.MaxValue;
         }
 
         /// <summary>
@@ -65,18 +62,15 @@ namespace Runtime
         /// <summary>
         /// Puts a specific color in a screen coordinates
         /// </summary>
-        private void PutPixel( int x, int y, float z, Color color )
+        void PutPixel( int x, int y, float z, Color color )
         {
             // As we have a 1-D Array for our back buffer
             // we need to know the equivalent cell in 1-D based
             // on the 2D coordinates on screen
-            var index = ( x + y * renderWidth );
+            var index = x + y * renderWidth;
             var index4 = index * 4;
 
-            if (depthBuffer[index] < z)
-            {
-                return; // Discard
-            }
+            if (depthBuffer[index] < z) return; // Discard
 
             depthBuffer[index] = z;
 
@@ -90,7 +84,7 @@ namespace Runtime
         /// Project takes some 3D coordinates and transform them
         /// in 2D coordinates using the transformation matrix
         /// </summary>
-        private Vertex Project( Vertex vertex, Matrix transMat, Matrix world )
+        Vertex Project( Vertex vertex, Matrix transMat, Matrix world )
         {
             // transforming the coordinates
             var point2D = Vector3.TransformCoordinates(vertex.Coordinates, transMat);
@@ -116,17 +110,17 @@ namespace Runtime
         /// <summary>
         /// DrawPoint calls PutPixel but does the clipping operation before
         /// </summary>
-        private void DrawPoint( Vector3 point, Color color )
+        void DrawPoint( Vector3 point, Color color )
         {
             // Clipping what's visible on screen
             if (point.X >= 0 && point.Y >= 0 && point.X < renderWidth && point.Y < renderHeight)
-                PutPixel((int) point.X, (int) point.Y,point.Z, color);
+                PutPixel((int) point.X, (int) point.Y, point.Z, color);
         }
 
         /// <summary>
         /// Clamps the value between min a max values
         /// </summary>
-        private float Clamp( float value, float min = 0, float max = 1 )
+        float Clamp( float value, float min = 0, float max = 1 )
         {
             return System.Math.Max(min, System.Math.Min(value, max));
         }
@@ -136,9 +130,10 @@ namespace Runtime
         /// min is the starting point, max the ending point
         /// and gradient the % between the 2 points
         /// </summary>
-        private float Interpolate( float min, float max, float gradient )
+        float Interpolate( float min, float max, float gradient )
         {
             return min + ( max - min ) * Clamp(gradient);
+            //return ( Clamp(gradient) * max ) + ( 1 - Clamp(gradient) * min );
         }
 
         /// <summary>
@@ -146,7 +141,8 @@ namespace Runtime
         /// papb -> pcpd
         /// pa, vb, vc, vd must then be sorted before
         /// </summary>
-        private void ProcessScanLine( ScanLineData data, Vertex va, Vertex vb, Vertex vc, Vertex vd, Color color, Texture texture )
+        void ProcessScanLine( ScanLineData data, Vertex va, Vertex vb, Vertex vc, Vertex vd, Color color,
+                              Texture      texture )
         {
             var pa = va.Coordinates;
             var pb = vb.Coordinates;
@@ -156,11 +152,15 @@ namespace Runtime
             // Thanks to current Y, we can compute the gradient to compute others values like
             // the starting X (sx) and ending X (ex) to draw between
             // if pa.Y == vb.Y or vc.Y == vd.Y, gradient is forced to 1
-            var gradient1 = System.Math.Abs(pa.Y - pb.Y) > float.MinValue ? (data.CurrentY - pa.Y) / (pb.Y - pa.Y) : 1;
-            var gradient2 = System.Math.Abs(pc.Y - pd.Y) > float.MinValue ? (data.CurrentY - pc.Y) / (pd.Y - pc.Y) : 1;
+            var gradient1 = System.Math.Abs(pa.Y - pb.Y) > float.MinValue
+                ? ( data.CurrentY - pa.Y ) / ( pb.Y - pa.Y )
+                : 1;
+            var gradient2 = System.Math.Abs(pc.Y - pd.Y) > float.MinValue
+                ? ( data.CurrentY - pc.Y ) / ( pd.Y - pc.Y )
+                : 1;
 
-            var sx = (int)Interpolate(pa.X, pb.X, gradient1);
-            var ex = (int)Interpolate(pc.X, pd.X, gradient2);
+            var sx = (int) Interpolate(pa.X, pb.X, gradient1);
+            var ex = (int) Interpolate(pc.X, pd.X, gradient2);
 
             // starting Z & ending Z
             var z1 = Interpolate(pa.Z, pb.Z, gradient1);
@@ -179,14 +179,14 @@ namespace Runtime
             for (var x = sx; x < ex; x++)
             {
                 //var gradient = (x - sx) / (float)(ex - sx);
-                var gradient = (x - sx) / (float)(ex - sx);
+                var gradient = ( x - sx ) / (float) ( ex - sx );
 
                 var z = Interpolate(z1, z2, gradient);
                 var ndotl = Interpolate(snl, enl, gradient);
                 var u = Interpolate(su, eu, gradient);
                 var v = Interpolate(sv, ev, gradient);
 
-                var textureColor = texture?.Map(u, v) ?? Colors.Black;
+                var textureColor = texture?.Map(u, v) ?? Colors.Magenta;
 
                 // changing the color value using the cosine of the angle
                 // between the light vector and the normal vector
@@ -202,7 +202,7 @@ namespace Runtime
         /// <param name="normal"></param>
         /// <param name="lightPosition"></param>
         /// <returns></returns>
-        private float ComputeNDotL(Vector3 vertex, Vector3 normal, Vector3 lightPosition)
+        float ComputeNDotL( Vector3 vertex, Vector3 normal, Vector3 lightPosition )
         {
             var lightDirection = lightPosition - vertex;
 
@@ -213,7 +213,7 @@ namespace Runtime
         }
 
 
-        private void DrawTriangle( Vertex v1, Vertex v2, Vertex v3, Color color, Texture texture )
+        void DrawTriangle( Vertex v1, Vertex v2, Vertex v3, Color color, Texture texture )
         {
             // Sorting the points in order to always have this order on screen p1, p2 & p3
             // with p1 always up (thus having the Y the lowest possible to be near the top screen)
@@ -244,7 +244,7 @@ namespace Runtime
             var p3 = v3.Coordinates;
 
             // Light position
-            var lightPos = new Vector3(0, 10, 10);
+            var lightPos = new Vector3(0, 10, 5000);
             // computing the cos of the angle between the light vector and the normal vector
             // it will return a value between 0 and 1 that will be used as the intensity of the color
             var nl1 = ComputeNDotL(v1.WorldCoordinates, v1.Normal, lightPos);
@@ -259,12 +259,12 @@ namespace Runtime
             // http://en.wikipedia.org/wiki/Slope
             // Computing slopes
             if (p2.Y - p1.Y > 0)
-                dP1P2 = (p2.X - p1.X) / (p2.Y - p1.Y);
+                dP1P2 = ( p2.X - p1.X ) / ( p2.Y - p1.Y );
             else
                 dP1P2 = 0;
 
             if (p3.Y - p1.Y > 0)
-                dP1P3 = (p3.X - p1.X) / (p3.Y - p1.Y);
+                dP1P3 = ( p3.X - p1.X ) / ( p3.Y - p1.Y );
             else
                 dP1P3 = 0;
 
@@ -280,8 +280,7 @@ namespace Runtime
             // -
             // P3
             if (dP1P2 > dP1P3)
-            {
-                for (var y = (int)p1.Y; y <= (int)p3.Y; y++)
+                for (var y = (int) p1.Y; y <= (int) p3.Y; y++)
                 {
                     data.CurrentY = y;
 
@@ -324,7 +323,6 @@ namespace Runtime
                         ProcessScanLine(data, v1, v3, v2, v3, color, texture);
                     }
                 }
-            }
             // First case where triangles are like that:
             //       P1
             //        -
@@ -337,8 +335,7 @@ namespace Runtime
             //        -
             //       P3
             else
-            {
-                for (var y = (int)p1.Y; y <= (int)p3.Y; y++)
+                for (var y = (int) p1.Y; y <= (int) p3.Y; y++)
                 {
                     data.CurrentY = y;
 
@@ -381,7 +378,6 @@ namespace Runtime
                         ProcessScanLine(data, v2, v3, v1, v3, color, texture);
                     }
                 }
-            }
         }
 
         /// <summary>
@@ -400,29 +396,28 @@ namespace Runtime
 
             for (var i = 0; i < meshes.Length; i++)
             {
-                var mesh = meshes[i];
                 // Beware to apply rotation before translation
-                var worldMatrix = Matrix.RotationYawPitchRoll(mesh.Rotation.Y,
-                                                              mesh.Rotation.X, mesh.Rotation.Z) *
-                                  Matrix.Translation(mesh.Position);
+                var worldMatrix = Matrix.RotationYawPitchRoll(meshes[i].Rotation.Y,
+                                                              meshes[i].Rotation.X, meshes[i].Rotation.Z) *
+                                  Matrix.Translation(meshes[i].Position);
 
                 var transformMatrix = worldMatrix * viewMatrix * projectionMatrix;
 
                 //Iterate over the faces, get the vertices of each face and draw the lines between them
-                Parallel.For(0, mesh.Faces.Length, ( j ) =>
+                Parallel.For(0, meshes[i].Faces.Length, j =>
                 {
-                    var pixelA = Project(mesh.Vertices[mesh.Faces[j].A], transformMatrix, worldMatrix);
-                    var pixelB = Project(mesh.Vertices[mesh.Faces[j].B], transformMatrix,worldMatrix);
-                    var pixelC = Project(mesh.Vertices[mesh.Faces[j].C], transformMatrix,worldMatrix);
+                    var pixelA = Project(meshes[i].Vertices[meshes[i].Faces[j].A], transformMatrix, worldMatrix);
+                    var pixelB = Project(meshes[i].Vertices[meshes[i].Faces[j].B], transformMatrix, worldMatrix);
+                    var pixelC = Project(meshes[i].Vertices[meshes[i].Faces[j].C], transformMatrix, worldMatrix);
 
-                    var color = 0.25f + j % mesh.Faces.Length * 0.75f / mesh.Faces.Length;
+                    var color = 0.25f + j % meshes[i].Faces.Length * 0.75f / meshes[i].Faces.Length;
                     DrawTriangle(pixelA, pixelB, pixelC, new Color
                     {
                         ScB = color,
                         ScG = color,
                         ScR = color,
                         ScA = 1f
-                    }, mesh.Texture);
+                    }, meshes[i].Texture);
                 });
             }
         }

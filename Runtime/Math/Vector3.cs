@@ -4,7 +4,7 @@ namespace Runtime.Math
 {
     public struct Vector3
     {
-        private const float ZeroTolerance = 1e-6f;
+        const float ZeroTolerance = 1e-6f;
 
         public static readonly Vector3 One = new Vector3(1f, 1f, 1f);
         public static readonly Vector3 Zero = new Vector3(0f, 0f, 0f);
@@ -51,7 +51,7 @@ namespace Runtime.Math
         /// therefore makes the vector homogeneous. The homogeneous vector is often preferred when working
         /// with coordinates as the w component can safely be ignored.
         /// </remarks>
-        private static void TransformCoordinate( ref Vector3 coordinate, ref Matrix transform, out Vector3 result )
+        static void TransformCoordinate( ref Vector3 coordinate, ref Matrix transform, out Vector3 result )
         {
             var vector = new Vector4
             {
@@ -145,7 +145,8 @@ namespace Runtime.Math
 
         public override string ToString()
         {
-            return $"{X.ToString(CultureInfo.InvariantCulture)},{Y.ToString(CultureInfo.InvariantCulture)},{Z.ToString(CultureInfo.InvariantCulture)}";
+            return
+                $"{X.ToString(CultureInfo.InvariantCulture)},{Y.ToString(CultureInfo.InvariantCulture)},{Z.ToString(CultureInfo.InvariantCulture)}";
         }
 
         /// <summary>
@@ -154,7 +155,7 @@ namespace Runtime.Math
         /// <param name="left">The first vector to subtract.</param>
         /// <param name="right">The second vector to subtract.</param>
         /// <returns>The difference of the two vectors.</returns>
-        public static Vector3 operator -(Vector3 left, Vector3 right)
+        public static Vector3 operator -( Vector3 left, Vector3 right )
         {
             return new Vector3(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
         }
@@ -164,7 +165,7 @@ namespace Runtime.Math
         /// </summary>
         /// <param name="value">The vector to negate.</param>
         /// <returns>A vector facing in the opposite direction.</returns>
-        public static Vector3 operator -(Vector3 value)
+        public static Vector3 operator -( Vector3 value )
         {
             return new Vector3(-value.X, -value.Y, -value.Z);
         }
@@ -175,7 +176,7 @@ namespace Runtime.Math
         /// <param name="left">The first vector to add.</param>
         /// <param name="right">The second vector to add.</param>
         /// <returns>The sum of the two vectors.</returns>
-        public static Vector3 operator +(Vector3 left, Vector3 right)
+        public static Vector3 operator +( Vector3 left, Vector3 right )
         {
             return new Vector3(left.X + right.X, left.Y + right.Y, left.Z + right.Z);
         }
@@ -186,7 +187,7 @@ namespace Runtime.Math
         /// <param name="value">The vector to scale.</param>
         /// <param name="scale">The amount by which to scale the vector.</param>
         /// <returns>The scaled vector.</returns>
-        public static Vector3 operator /(Vector3 value, float scale)
+        public static Vector3 operator /( Vector3 value, float scale )
         {
             return new Vector3(value.X / scale, value.Y / scale, value.Z / scale);
         }
@@ -197,7 +198,7 @@ namespace Runtime.Math
         /// <param name="left">The first value to compare.</param>
         /// <param name="right">The second value to compare.</param>
         /// <returns><c>true</c> if <paramref name="left"/> has the same value as <paramref name="right"/>; otherwise, <c>false</c>.</returns>
-        public static bool operator ==(Vector3 left, Vector3 right)
+        public static bool operator ==( Vector3 left, Vector3 right )
         {
             return left.Equals(ref right);
         }
@@ -208,7 +209,7 @@ namespace Runtime.Math
         /// <param name="left">The first value to compare.</param>
         /// <param name="right">The second value to compare.</param>
         /// <returns><c>true</c> if <paramref name="left"/> has a different value than <paramref name="right"/>; otherwise, <c>false</c>.</returns>
-        public static bool operator !=(Vector3 left, Vector3 right)
+        public static bool operator !=( Vector3 left, Vector3 right )
         {
             return !left.Equals(ref right);
         }
@@ -220,11 +221,11 @@ namespace Runtime.Math
         /// <returns>
         /// 	<c>true</c> if the specified <see cref="Vector3"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public bool Equals(ref Vector3 other)
+        public bool Equals( ref Vector3 other )
         {
-            return System.Math.Abs(other.X  - X) < ZeroTolerance &&
+            return System.Math.Abs(other.X - X) < ZeroTolerance &&
                    System.Math.Abs(other.Y - Y) < ZeroTolerance &&
-                       System.Math.Abs(other.Z - Z) < ZeroTolerance;
+                   System.Math.Abs(other.Z - Z) < ZeroTolerance;
         }
 
         /// <summary>
@@ -234,7 +235,7 @@ namespace Runtime.Math
         /// <returns>
         /// 	<c>true</c> if the specified <see cref="Vector3"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public bool Equals(Vector3 other)
+        public bool Equals( Vector3 other )
         {
             return Equals(ref other);
         }

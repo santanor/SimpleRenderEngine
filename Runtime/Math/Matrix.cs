@@ -147,7 +147,7 @@ namespace Runtime.Math
         /// <param name="up">The camera's up vector.</param>
         /// <param name="result">When the method completes, contains the created look-at matrix.</param>
         // ReSharper disable once InconsistentNaming
-        private static void LookAtLH( ref Vector3 eye, ref Vector3 target, ref Vector3 up, out Matrix result )
+        static void LookAtLH( ref Vector3 eye, ref Vector3 target, ref Vector3 up, out Matrix result )
         {
             Vector3.Subtract(ref target, ref eye, out var zaxis);
             zaxis.Normalize();
@@ -198,7 +198,7 @@ namespace Runtime.Math
         /// <param name="zfar">Maximum z-value of the viewing volume.</param>
         /// <param name="result">When the method completes, contains the created projection matrix.</param>
         // ReSharper disable once InconsistentNaming
-        private static void PerspectiveFovRH( float fov, float aspect, float znear, float zfar, out Matrix result )
+        static void PerspectiveFovRH( float fov, float aspect, float znear, float zfar, out Matrix result )
         {
             var yScale = (float) ( 1.0f / System.Math.Tan(fov * 0.5f) );
             var q = zfar / ( znear - zfar );
@@ -235,7 +235,7 @@ namespace Runtime.Math
         /// <param name="pitch">Pitch around the x-axis, in radians.</param>
         /// <param name="roll">Roll around the z-axis, in radians.</param>
         /// <param name="result">When the method completes, contains the created rotation matrix.</param>
-        private static void RotationYawPitchRoll( float yaw, float pitch, float roll, out Matrix result )
+        static void RotationYawPitchRoll( float yaw, float pitch, float roll, out Matrix result )
         {
             var quaternion = new Quaternion();
             Quaternion.RotationYawPitchRoll(yaw, pitch, roll, out quaternion);
@@ -260,7 +260,7 @@ namespace Runtime.Math
         /// </summary>
         /// <param name="rotation">The quaternion to use to build the matrix.</param>
         /// <param name="result">The created rotation matrix.</param>
-        private static void RotationQuaternion( ref Quaternion rotation, out Matrix result )
+        static void RotationQuaternion( ref Quaternion rotation, out Matrix result )
         {
             var xx = rotation.X * rotation.X;
             var yy = rotation.Y * rotation.Y;
@@ -290,7 +290,7 @@ namespace Runtime.Math
         /// <param name="left">The first matrix to multiply.</param>
         /// <param name="right">The second matrix to multiply.</param>
         /// <param name="result">The product of the two matrices.</param>
-        private static void Multiply( ref Matrix left, ref Matrix right, out Matrix result )
+        static void Multiply( ref Matrix left, ref Matrix right, out Matrix result )
         {
             var temp = new Matrix
             {

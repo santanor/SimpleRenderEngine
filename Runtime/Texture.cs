@@ -1,23 +1,18 @@
 ﻿using System;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Windows;
+using System.Drawing;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
+using Color = System.Windows.Media.Color;
 
 namespace Runtime
 {
     public class Texture
     {
-        private byte[] internalBuffer;
-        private readonly int width;
-        private readonly int height;
-        private WriteableBitmap bmp;
+        int height;
+        Color[,] textureColors;
+        int width;
 
-        public Texture( string fileName, int width, int height )
+        public Texture( string fileName )
         {
-            this.width = width;
-            this.height = height;
             Load(fileName);
         }
 
@@ -25,23 +20,30 @@ namespace Runtime
         /// Loads a texture from a file. It'll save it in the internal buffer
         /// </summary>
         /// <param name="fileName"></param>
-        private void Load( string fileName )
+        void Load( string fileName )
         {
             try
             {
-                var buffer= File.ReadAllBytes(fileName);
+                var b = new Bitmap(fileName);
+                textureColors = new Color[b.Width, b.Height];
+                width = b.Width;
+                height = b.Height;
 
-                bmp = new WriteableBitmap(
-                    width,
-                    height,
-                    300,
-                    300,
-                    PixelFormats.Bgra32,
-                    null);
-                Marshal.Copy(buffer, 0, bmp.BackBuffer, buffer.Length);
-                internalBuffer = new byte[width * bmp.BackBufferStride];
-                bmp.CopyPixels(internalBuffer, bmp.BackBufferStride, 0);
-
+                for (var i = 0; i < b.Width; i++)
+                {
+                    for (var j = 0; j < b.Height; j++)
+                    {
+                        var c = b.GetPixel(i, j);
+                        //Manually map the color. Different color structs
+                        textureColors[i, j] = new Color
+                        {
+                            R = c.R,
+                            G = c.G,
+                            B = c.B,
+                            A = c.A
+                        };
+                    }
+                }
             }
             catch (Exception e)
             {
@@ -55,28 +57,17 @@ namespace Runtime
         /// <param name="tu"></param>
         /// <param name="tv"></param>
         /// <returns></returns>
-        public Color Map(float tu, float tv)
+        public Color Map( float tu, float tv )
         {
-            if (internalBuffer == null)
-                return Colors.Aqua;
-
             // using a % operator to cycle/repeat the texture if needed
-            var u = System.Math.Abs((int) (tu*width) % width);
-            var v = System.Math.Abs((int) (tv*height) % height);
+            var u = System.Math.Abs((int) ( tu * width ) % width);
+            var v = System.Math.Abs((int) ( tv * height ) % height);
 
-            var pos = ( u + v * width ) * (PixelFormats.Bgra32.BitsPerPixel/8);
-            var b = internalBuffer[pos];
-            var g = internalBuffer[pos + 1];
-            var r = internalBuffer[pos + 2];
-            var a = internalBuffer[pos + 3];
+            //checks whether the texture is there or the coordinates are within range
+            if (textureColors == null || u > textureColors.GetLength(0) || v > textureColors.GetLength(1))
+                return Colors.Magenta;
 
-            return new Color
-            {
-                R = r,
-                G = g,
-                B = b,
-                A = a
-            };
+            return textureColors[u, v];
         }
     }
 }

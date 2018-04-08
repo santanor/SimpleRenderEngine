@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Runtime.Math;
 
@@ -11,8 +9,8 @@ namespace Runtime.ParserModels
     /// </summary>
     public class Parser
     {
-        private string fileName;
-        private Extensions extension;
+        readonly Extensions extension;
+        readonly string fileName;
 
         /// <summary>
         /// Creates a new parser based on the filename. Th parser system
@@ -22,10 +20,7 @@ namespace Runtime.ParserModels
         public Parser( string fileName )
         {
             this.fileName = fileName;
-            if (Enum.TryParse<Extensions>(fileName.Split('.').Last(), out var ext))
-            {
-                extension = ext;
-            }
+            if (Enum.TryParse<Extensions>(fileName.Split('.').Last(), out var ext)) extension = ext;
         }
 
         /// <summary>
@@ -34,10 +29,14 @@ namespace Runtime.ParserModels
         /// <returns></returns>
         public Mesh[] Parse()
         {
+            IParser parser;
+
+            //Each extension will have a different object taking care of it
             switch (extension)
             {
                 case Extensions.obj:
-                    return ParseObj();
+                    parser = new ObjParser(fileName);
+                    break;
                 case Extensions.babylon:
                     return ParseBabylon();
                 case Extensions.fbx:
@@ -45,107 +44,17 @@ namespace Runtime.ParserModels
                 default:
                     return null;
             }
-        }
 
-        /// <summary>
-        /// Custom parser for the .obj filesystem
-        /// </summary>
-        /// <returns></returns>
-        private Mesh[] ParseObj()
-        {
-            //This filesystem starts each line with a letter representing a vertex (v), normal (vn)  or a face (f)
-            string[] lines = File.ReadAllLines(fileName);
-
-            var vertices = new List<Vertex>();
-            var normals = new List<Vector3>();
-            var faces = new List<Face>();
-            var uvs = new List<Vector2>();
-            var name = "";
-            //We'll loop though the lines and assign each line to a collection.
-            for (var i = 0; i < lines.Length; i++)
-            {
-                //Divides the current line in chunks
-                var lineChunks = lines[i].Split(' ');
-
-
-                switch (lineChunks[0])
-                {
-                    case "v"://It's a vertex
-                        vertices.Add( new Vertex()
-                        {
-                            Coordinates =
-                            {
-                                X = float.Parse(lineChunks[1]),
-                                Y = float.Parse(lineChunks[2]),
-                                Z = float.Parse(lineChunks[3])
-                            }
-                        });
-                        break;
-                    case "vn"://It's a normal
-                        normals.Add( new Vector3
-                        {
-                            X = float.Parse(lineChunks[1]),
-                            Y = float.Parse(lineChunks[2]),
-                            Z = float.Parse(lineChunks[3])
-                        });
-                        break;
-                    case "f"://It's a face
-                        faces.Add(new Face//Faces are 1 based. remove 1 from every face
-                        {
-                            A = int.Parse(lineChunks[1].Split('/')[0])-1,
-                            B = int.Parse(lineChunks[2].Split('/')[0])-1,
-                            C = int.Parse(lineChunks[3].Split('/')[0])-1,
-                            D = lineChunks.Length == 5 ? int.Parse(lineChunks[4].Split('/','/')[0])-1 : 0,
-                        });
-                        break;
-                    case "vt":
-                        uvs.Add(new Vector2()
-                        {
-                            X = float.Parse(lineChunks[1]),
-                            Y = float.Parse(lineChunks[2])
-                        });
-                        break;
-                    case "o":
-                        name = lineChunks[1];
-                    break;
-                }
-            }
-
-            //Loop through the vertices and add the normal
-            for (var i = 0; i < vertices.Count; i++)
-            {
-                //Save the variable, struct stuff....
-                var vert =  vertices[i];
-                if (i < normals.Count)
-                {
-                    vert.Normal = normals[i];
-                }
-
-                if (i < uvs.Count)
-                {
-                    vert.TexCoord = uvs[i];
-                }
-
-                vertices[i] = vert;
-            }
-
-            var mesh = new Mesh
-            {
-                Name = name,
-                Vertices = vertices.ToArray(),
-                Faces = faces.ToArray()
-            };
-
-            return new []{mesh};
+            return parser?.Parse();
         }
 
 
-        private Mesh[] ParseFbx()
+        Mesh[] ParseFbx()
         {
             return null;
         }
 
-        private Mesh[] ParseBabylon()
+        Mesh[] ParseBabylon()
         {
             return null;
         }
