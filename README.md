@@ -1,2 +1,2 @@
 # SimpleRenderEngine
-Just a simple render engine made from scratch!
+Simple CPU render engine made from scratch!
